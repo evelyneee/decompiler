@@ -1,9 +1,3 @@
-//
-//  decompile.swift
-//  decompiler
-//
-//  Created by charlotte on 2022-11-22.
-//
 
 import Foundation
 
@@ -32,12 +26,15 @@ func bl(_ raw: String) -> String {
     return (comp ?? "UNKNOWN_FUNCTION") + "(" + regs.x.compactMap(\.value).map(String.init).joined(separator: ", ") + ")"
 }
 
+var conditionCodes: [String: Bool] = [:]
+
 func cmp(_ raw: String) -> String {
     let comp = raw.components(separatedBy: " ").dropFirst().joined().components(separatedBy: ",")
     let dest = comp[0]
     let source = comp[1].dropFirst()
-    if let reg = regs.x[String(dest.dropFirst())], String(reg ?? 0) == source {
-        return "// stripped out dead code " + raw
+    if let reg = regs.x[String(dest.dropFirst())] {
+        conditionCodes["EQ"] = String(reg ?? 0) == source
+        return "// stripped out dead code: " + raw
     } else {
         indentCount += 1
         return "if (" + dest + " == " + String(source) + ") {"

@@ -3,9 +3,7 @@ import Foundation
 
 let str = """
 mov x0, #1
-bl _exit
-cmp x0, #1
-cmp x3, #1
+cmp x0, #2
 b.eq _exit
 """
 
@@ -30,7 +28,15 @@ for line in str.components(separatedBy: "\n") {
     case "cmp":
         out.append(cmp(line))
     case "b.eq":
-        out.append(beq(line))
+        if let code = conditionCodes["EQ"] {
+            if code {
+                out.append(beq(line))
+            } else {
+                out.append("// stripped out dead code: " + line)
+            }
+        } else {
+            out.append(beq(line))
+        }
     default: continue
     }
 }
@@ -43,6 +49,8 @@ print("---------- DECOMP -----------")
 
 print(out.joined(separator: "\n"))
 
-for i in 1...indentCount {
-    print((0..<(indentCount - i)).map { _ in "  "}.joined() + "}")
+if indentCount != 0 {
+    for i in 1...indentCount {
+        print((0..<(indentCount - i)).map { _ in "  "}.joined() + "}")
+    }
 }
