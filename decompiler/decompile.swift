@@ -34,7 +34,11 @@ func cmp(_ raw: String) -> String {
     let source = comp[1].dropFirst()
     if let reg = regs.x[String(dest.dropFirst())] {
         conditionCodes["EQ"] = String(reg ?? 0) == source
+        #if DEBUG
         return "// stripped out dead code: " + raw
+        #else
+        return ""
+        #endif
     } else {
         indentCount += 1
         return "if (" + dest + " == " + String(source) + ") {"
@@ -46,9 +50,11 @@ func beq(_ raw: String) -> String {
     if let _comp = comp, _comp.hasPrefix("_") {
         comp = String(_comp.dropFirst())
     }
-    return (0..<indentCount).map({ _ in "    " }).joined() +
+    let ret = (0..<indentCount).map({ _ in "    " }).joined() +
     (comp ?? "UNKNOWN_FUNCTION") +
     "(" +
     regs.x.compactMap(\.value).map(String.init).joined(separator: ", ") +
     ")"
+    regs.x = [:] // can't trust regs after function call
+    return ret
 }

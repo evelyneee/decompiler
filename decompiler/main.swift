@@ -5,6 +5,9 @@ let str = """
 mov x0, #1
 cmp x0, #2
 b.eq _exit
+mov x1, x0
+cmp x1, #1
+b.eq _exit
 """
 
 var out: [String] = .init()
@@ -32,7 +35,10 @@ for line in str.components(separatedBy: "\n") {
             if code {
                 out.append(beq(line))
             } else {
+                #if DEBUG
                 out.append("// stripped out dead code: " + line)
+                #endif
+                conditionCodes.removeValue(forKey: "EQ")
             }
         } else {
             out.append(beq(line))
@@ -54,3 +60,7 @@ if indentCount != 0 {
         print((0..<(indentCount - i)).map { _ in "  "}.joined() + "}")
     }
 }
+
+print("---------- REGISTERS -----------")
+
+print(regs)
